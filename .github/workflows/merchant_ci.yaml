@@ -1,0 +1,53 @@
+name: Merchant CI/CD
+
+on:
+  push:
+    paths:
+      - 'merchant/**'
+      - 'shared/**'
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.22
+
+      - name: Lint Merchant
+        run: |
+          cd merchant
+          go fmt ./...
+          go vet ./...
+
+      - name: Lint Shared Models
+        run: |
+          cd shared/models
+          go fmt ./...
+          go vet ./...
+
+      - name: Test Merchant
+        run: |
+          cd merchant
+          go test -v -cover ./...
+
+      - name: Test Shared Models
+        run: |
+          cd shared/models
+          go test -v -cover ./...
+
+      - name: Build Docker image
+        run: |
+          docker build -f merchant/dockerfile -t tommyhuanghhh/paymentgateway-merchant:latest .
+          
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker image
+        run: |
+          docker push tommyhuanghhh/paymentgateway-merchant:latest
