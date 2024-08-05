@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/processout-hiring/payment-gateway-thuang86714/merchant/pkg"
+	"github.com/processout-hiring/payment-gateway-thuang86714/merchant/service"
 )
 
 func main() {
-	pkg.Exec()
+	service.Exec()
 }
