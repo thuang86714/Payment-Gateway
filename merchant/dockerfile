@@ -1,0 +1,41 @@
+# Start with the official Golang image that contains Go and some basic tools
+FROM golang:1.22-alpine AS builder
+
+# Set the Current Working Directory inside the container
+WORKDIR /app
+
+# Copy go mod and sum files from the root directory
+COPY go.mod go.sum ./
+
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# Copy the source code from the merchant directory and the shared models
+COPY merchant ./merchant
+COPY shared/models/invoice.go ./shared/models/invoice.go
+COPY shared/models/invoice_test.go ./shared/models/invoice_test.go
+COPY shared/models/response.go ./shared/models/response.go
+# Set the working directory to merchant/cmd
+WORKDIR /app/merchant/cmd
+
+# Build the Go app
+RUN go build -o main .
+
+# Start a new stage from scratch
+FROM alpine:latest
+
+# Set environment variable for the .env file
+ENV GATEWAY_URL=http://localhost:8081
+
+# Set the Current Working Directory inside the container
+WORKDIR /root/
+
+# Copy the Pre-built binary file and .env from the previous stage
+COPY --from=builder /app/merchant/cmd/main .
+COPY --from=builder /app/merchant/.env .
+
+# Expose port 8080 to the outside world
+EXPOSE 8080
+
+# Command to run the executable
+CMD ["./main"]
