@@ -108,6 +108,7 @@ func TestIsCurrencyInputValid(t *testing.T) {
 		{"Valid currency - EUR", "EUR", true},
 		{"Valid currency - GBP", "GBP", true},
 		{"Invalid currency - ABC", "ABC", false},
+		{"Invalid currency - 123", "123", false},
 		{"Empty string", "", false},
 		{"Lowercase valid currency - usd", "usd", false},
 	}

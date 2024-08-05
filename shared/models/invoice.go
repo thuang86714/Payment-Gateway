@@ -3,6 +3,7 @@ package models
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -15,14 +16,14 @@ import (
 // Invoice represents the Invoice API object
 type Invoice struct {
 	CardNumber     string `json:"cardNumber"`
-	ExpirationDate string `json: "expirationDate"`
-	PricePerItem   int    `json: "pricePerItem"`
-	Curreny        string `json: "currency"`
-	CVV            string `json: "cvv"`
-	Item           string `json: "item"`
-	Quantity       int    `json: "quantity"`
-	timestamp      string `json: "timestamp"`
-	Total          int    `json: "total"`
+	ExpirationDate string `json:"expirationDate"`
+	PricePerItem   int    `json:"pricePerItem"`
+	Currency       string `json:"currency"`
+	CVV            string `json:"cvv"`
+	Item           string `json:"item"`
+	Quantity       int    `json:"quantity"`
+	Timestamp      string `json:"timestamp"`
+	Total          int    `json:"total"`
 }
 
 // TakeInputForNewInvoice takes all necessary inputs from the merchant, return a Invoice object
@@ -30,7 +31,7 @@ func TakeInputForNewInvoice() Invoice {
 	reader := bufio.NewReader(os.Stdin)
 	var curInvoice Invoice
 	for {
-		fmt.Printf("To process payment, please provide: \na. What do you want to check out today? \nb. How many? \nc. Price per item \n d. Currency \n e. Card Number\n f. Expiration Date\n g. CVV\n")
+		fmt.Printf("To process payment, please provide: \na. What do you want to check out today? \nb. How many? \nc. Price per item \nd. Currency \ne. Card Number\nf. Expiration Date\ng. CVV\n")
 
 		curItem := takeItemForNewInvoice(reader)
 		curQuantity := takeQuantityForNewInvoice(reader)
@@ -48,14 +49,13 @@ func TakeInputForNewInvoice() Invoice {
 		fmt.Printf("If every field of this invoice is correct, enter 1, else enter 2")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input:", err)
-			os.Exit(1)
+			log.Fatal("Error reading input:", err)
 		}
 
 		input = strings.TrimSpace(input)
 		action, err := strconv.Atoi(input)
 		if err != nil {
-			fmt.Printf("Incorrect Input: %s. Try again.\n", input)
+			log.Printf("Incorrect Input: %s. Try again.\n", input)
 			continue
 		}
 
@@ -68,15 +68,14 @@ func TakeInputForNewInvoice() Invoice {
 
 // TakeInputForOldInvoice takes InvoiceID as input from the merchant, return InvoiceID
 func TakeInputForOldInvoice() string {
-	fmt.Printf("To retrieve a previously-made payment, please provide: InvoiceID")
+	fmt.Printf("To retrieve a previously-made payment, please provide: InvoiceID\n")
 	reader := bufio.NewReader(os.Stdin)
 	var invoiceID string
 	for {
 		fmt.Printf("Please enter the InvoiceID:")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input:", err)
-			os.Exit(1)
+			logFatalError(err)
 		}
 
 		invoiceID = strings.TrimSpace(input)
@@ -92,11 +91,10 @@ func TakeInputForOldInvoice() string {
 func takeCardNumberForNewInvoice(reader *bufio.Reader) string {
 	var cardNumber string
 	for {
-		fmt.Printf("Please enter the card number:")
+		fmt.Printf("Please enter the card number: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input:", err)
-			os.Exit(1)
+			logFatalError(err)
 		}
 
 		cardNumber = strings.TrimSpace(input)
@@ -114,11 +112,10 @@ func takeCardNumberForNewInvoice(reader *bufio.Reader) string {
 func takeExpirationDateForNewInvoice(reader *bufio.Reader) string {
 	var expirationDate string
 	for {
-		fmt.Printf("Please enter the expeiration date in the MM/YY format, eg. 08/24")
+		fmt.Printf("Please enter the expeiration date in the MM/YY format, eg. 08/24: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input:", err)
-			os.Exit(1)
+			logFatalError(err)
 		}
 
 		expirationDate = strings.TrimSpace(input)
@@ -135,11 +132,10 @@ func takeExpirationDateForNewInvoice(reader *bufio.Reader) string {
 // takeItemForNewInvoice takes item from the merchant, return item
 func takeItemForNewInvoice(reader *bufio.Reader) string {
 	var itemName string
-	fmt.Printf("Please enter what are you going to check out today:")
+	fmt.Printf("Please enter what are you going to check out today: ")
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Println("Error reading input:", err)
-		os.Exit(1)
+		logFatalError(err)
 	}
 
 	itemName = strings.TrimSpace(input)
@@ -150,11 +146,10 @@ func takeItemForNewInvoice(reader *bufio.Reader) string {
 // takeQuantityForNewInvoice takes item from the merchant, return quantity
 func takeQuantityForNewInvoice(reader *bufio.Reader) int {
 	var quantity int
-	fmt.Printf("Please enter how many are you going to check out today:")
+	fmt.Printf("Please enter how many are you going to check out today: ")
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Println("Error reading input:", err)
-		os.Exit(1)
+		logFatalError(err)
 	}
 
 	quantityStr := strings.TrimSpace(input)
@@ -166,11 +161,10 @@ func takeQuantityForNewInvoice(reader *bufio.Reader) int {
 // takePricePerItemForNewInvoice takes price per item from the merchant, return price per item
 func takePricePerItemForNewInvoice(reader *bufio.Reader) int {
 	var pricePerItem int
-	fmt.Printf("Please enter price per item:")
+	fmt.Printf("Please enter price per item: ")
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Println("Error reading input:", err)
-		os.Exit(1)
+		logFatalError(err)
 	}
 
 	priceStr := strings.TrimSpace(input)
@@ -184,16 +178,16 @@ func takeCurrencyForNewInvoice(reader *bufio.Reader) string {
 	var currency string
 
 	for {
-		fmt.Printf("Please enter the currency, e.g USD:")
+		fmt.Printf("Please enter the currency, e.g USD: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input:", err)
-			os.Exit(1)
+			logFatalError(err)
 		}
 
 		currency = strings.TrimSpace(input)
+		currency = strings.ToUpper(currency)
 		//do input check
-		if isCVVInputValid(currency) {
+		if isCurrencyInputValid(currency) {
 			break
 		}
 		//print invalid input
@@ -206,11 +200,10 @@ func takeCurrencyForNewInvoice(reader *bufio.Reader) string {
 func takeCVVForNewInvoice(reader *bufio.Reader) string {
 	var cvv string
 	for {
-		fmt.Printf("Please enter the CVV, e.g 034:")
+		fmt.Printf("Please enter the CVV, e.g 034: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input:", err)
-			os.Exit(1)
+			logFatalError(err)
 		}
 
 		cvv = strings.TrimSpace(input)
@@ -232,14 +225,14 @@ func createInvoice(curCardNumber, curExpirationDate, curCurrecny, curCVV, curIte
 		CardNumber:     curCardNumber,
 		ExpirationDate: curExpirationDate,
 		PricePerItem:   curPricePerItem,
-		Curreny:        curCurrecny,
+		Currency:       curCurrecny,
 		CVV:            curCVV,
 		Item:           curItem,
 		Quantity:       curQuantity,
-		timestamp:      curTimeStamp,
+		Timestamp:      curTimeStamp,
 		Total:          curPricePerItem * curQuantity,
 	}
-	printInvoice(curInvoice)
+	log.Printf("For this purchase, you invoice is %+v", curInvoice)
 	return curInvoice
 }
 
@@ -269,7 +262,7 @@ func isExpDateInputValid(expirationDate string) bool {
 		return false
 	}
 
-	if expirationDate[2] != '/'{
+	if expirationDate[2] != '/' {
 		return false
 	}
 
@@ -314,9 +307,9 @@ func isCardValid(cardNumber, cVV, expirationDate string) bool {
 	return true
 }
 
+// isCurrencyInputValid checks if the input is a valid currency, return bool
 var getCurrency = money.GetCurrency
 
-// isCurrencyInputValid checks if the input is a valid currency, return bool
 func isCurrencyInputValid(code string) bool {
 	currency := getCurrency(code)
 	return currency != nil
@@ -363,17 +356,9 @@ func isInvoiceIDInputValid(invoiceID string) bool {
 
 // printInvalidInput prints invalid input
 func printInvalidInput(invalidInput string) {
-	fmt.Printf("%s is not a valid input, please try again.\n", invalidInput)
+	log.Printf("%s is not a valid input, please try again.\n", invalidInput)
 }
 
-// printInvalidInput prints content of curInvoice
-func printInvoice(curInvoice Invoice) {
-	fmt.Printf("For this purchase, you check out: %s\n", curInvoice.Item)
-	fmt.Printf("For this purchase, you check out: %d\n item", curInvoice.Quantity)
-	fmt.Printf("For this purchase, price per item is: %d\n", curInvoice.PricePerItem)
-	fmt.Printf("For this purchase, card number is: %s\n", curInvoice.CardNumber)
-	fmt.Printf("For this purchase, expiration date is: %s\n", curInvoice.ExpirationDate)
-	fmt.Printf("For this purchase, CVV is: %s\n", curInvoice.CVV)
-	fmt.Printf("For this purchase, currecny is: %s\n", curInvoice.Curreny)
-	fmt.Printf("For this purchase, total amount is: %d\n", curInvoice.Total)
+func logFatalError(err error) {
+	log.Fatal("Error reading input:", err)
 }
