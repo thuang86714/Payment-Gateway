@@ -23,7 +23,7 @@ func processPayment() error {
 	}
 
 	//print the response
-	fmt.Printf("Response from service: \n InvoiceID: %s\n Status Code: %s\n. Retrieve: %d %s", curResponse.InvoiceID, curResponse.StatusCode, curResponse.Amount, curResponse.Curreny)
+	fmt.Printf("Response from service: \n InvoiceID: %s\n Status Code: %s\n. Retrieve: %f %s", curResponse.InvoiceID, curResponse.StatusCode, curResponse.AmountReceived, curResponse.Currency)
 	
 	return nil
 }
