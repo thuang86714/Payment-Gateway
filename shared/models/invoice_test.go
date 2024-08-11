@@ -24,7 +24,7 @@ func TestIsCardNumberInputValid(t *testing.T) {
 
 	for _, tc := range testcase {
 		t.Run(tc.name, func(t *testing.T) {
-			got := isCardNumberInputValid(tc.input)
+			got := IsCardNumberInputValid(tc.input)
 
 			if tc.expected != got {
 				t.Errorf("expected %t, but got %t", tc.expected, got)
@@ -68,7 +68,7 @@ func TestIsExpDateInputValid(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := isExpDateInputValid(tc.expirationDate)
+			got := IsExpDateInputValid(tc.expirationDate)
 			if tc.expected != got {
 				t.Errorf("isExpDateInputValid(%q) = %t; expected %t", tc.expirationDate, got, tc.expected)
 			}
