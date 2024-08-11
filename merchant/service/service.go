@@ -11,11 +11,8 @@ import (
 )
 
 func Exec() {
-	// Load environment variables from .env file
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	//load .env parameters
+	loadEnv()
 
 	//Greet the merchant
 	fmt.Printf("Dear Merchant, Welcome to Tommy's Payment Gateway!\n")
@@ -27,6 +24,30 @@ func Exec() {
 			log.Printf("Error: %v\n", err)
 		}
 	}
+}
+
+func loadEnv(){
+		// Define possible locations for the .env file
+		envLocations := []string{
+			".env",
+			"../.env",
+			"../../.env",
+			"/root/.env",
+		}
+	
+		// Try to load the .env file from each location
+		var envLoaded bool
+		for _, loc := range envLocations {
+			if err := godotenv.Load(loc); err == nil {
+				log.Printf("Loaded .env file from %s", loc)
+				envLoaded = true
+				break
+			}
+		}
+	
+		if !envLoaded {
+			log.Fatal("Error loading .env file")
+		}
 }
 
 // getMerchantAction prompts the merchant to select an action.
