@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/processout-hiring/payment-gateway-thuang86714/gateway/controller"
-	middleware "github.com/processout-hiring/payment-gateway-thuang86714/shared/middlerware"
+	middleware "github.com/processout-hiring/payment-gateway-thuang86714/shared/middleware"
 )
 
 // SetRoutes sets up the routes for the application
