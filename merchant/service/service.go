@@ -14,6 +14,7 @@ func Exec() {
 	//load .env parameters
 	loadEnv()
 
+
 	//Greet the merchant
 	fmt.Printf("Dear Merchant, Welcome to Tommy's Payment Gateway!\n")
 
@@ -26,6 +27,7 @@ func Exec() {
 	}
 }
 
+//load from .env
 func loadEnv(){
 		// Define possible locations for the .env file
 		envLocations := []string{
