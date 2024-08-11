@@ -256,6 +256,7 @@ func IsCardNumberInputValid(cardNumber string) bool {
 // isExpDateInputValid checks if the input is a valid expiration date, return bool
 var TimeNow = time.Now
 
+
 func IsExpDateInputValid(expirationDate string) bool {
 	// Check if the length is exactly 5 characters
 	if len(expirationDate) != 5 {
