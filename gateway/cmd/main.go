@@ -13,7 +13,25 @@ import (
 )
 
 func main() {
-	if godotenv.Load("../.env") != nil {
+	// Define possible locations for the .env file
+	envLocations := []string{
+		".env",
+		"../.env",
+		"../../.env",
+		"/root/.env",
+	}
+
+	// Try to load the .env file from each location
+	var envLoaded bool
+	for _, loc := range envLocations {
+		if err := godotenv.Load(loc); err == nil {
+			log.Printf("Loaded .env file from %s", loc)
+			envLoaded = true
+			break
+		}
+	}
+
+	if !envLoaded {
 		log.Fatal("Error loading .env file")
 	}
 
@@ -31,4 +49,3 @@ func main() {
 	gatewayPort := os.Getenv("GATEWAY_PORT")
 	r.Run(gatewayPort)
 }
-

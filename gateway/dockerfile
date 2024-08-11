@@ -10,33 +10,30 @@ COPY go.mod go.sum ./
 # Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the source code from the merchant directory and the shared models
+# Copy the source code from the gateway directory and the shared models
 COPY gateway ./gateway
-COPY shared/models/invoice.go ./shared/models/invoice.go
-COPY shared/models/invoice_test.go ./shared/models/invoice_test.go
-COPY shared/models/response.go ./shared/models/response.go
-COPY shared/models/transaction.go ./shared/models/transaction.go
-# Set the working directory to merchant/cmd
+COPY shared ./shared
+
+# Set the working directory to gateway/cmd
 WORKDIR /app/gateway/cmd
 
 # Build the Go app
-RUN go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 # Start a new stage from scratch
 FROM alpine:latest
 
-# Set environment variable for the .env file
-ENV GATEWAY_URL=http://localhost:8081
-
 # Set the Current Working Directory inside the container
 WORKDIR /root/
 
-# Copy the Pre-built binary file and .env from the previous stage
+# Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/gateway/cmd/main .
-COPY --from=builder /app/gateway/.env .
 
-# Expose port 8080 to the outside world
-EXPOSE 8080
+# Copy the .env file
+COPY gateway/.env .
+
+# Expose port 8081 to the outside world
+EXPOSE 8081
 
 # Command to run the executable
 CMD ["./main"]
