@@ -99,7 +99,7 @@ func takeCardNumberForNewInvoice(reader *bufio.Reader) string {
 
 		cardNumber = strings.TrimSpace(input)
 		//do input check
-		if isCardNumberInputValid(cardNumber) {
+		if IsCardNumberInputValid(cardNumber) {
 			break
 		}
 		//print invalid input
@@ -120,7 +120,7 @@ func takeExpirationDateForNewInvoice(reader *bufio.Reader) string {
 
 		expirationDate = strings.TrimSpace(input)
 		//do input check
-		if isExpDateInputValid(expirationDate) {
+		if IsExpDateInputValid(expirationDate) {
 			break
 		}
 		//print invalid input
@@ -237,7 +237,7 @@ func createInvoice(curCardNumber, curExpirationDate, curCurrecny, curCVV, curIte
 }
 
 // isCardNumberInputValid checks if the input a valid card number, return bool
-func isCardNumberInputValid(cardNumber string) bool {
+func IsCardNumberInputValid(cardNumber string) bool {
 	// Check if the length is exactly 16 characters
 	if len(cardNumber) != 16 {
 		return false
@@ -256,7 +256,7 @@ func isCardNumberInputValid(cardNumber string) bool {
 // isExpDateInputValid checks if the input is a valid expiration date, return bool
 var TimeNow = time.Now
 
-func isExpDateInputValid(expirationDate string) bool {
+func IsExpDateInputValid(expirationDate string) bool {
 	// Check if the length is exactly 5 characters
 	if len(expirationDate) != 5 {
 		return false
