@@ -68,7 +68,7 @@ func TestIsExpDateInputValid(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-      got := IsExpDateInputValid(tc.expirationDate)
+			got := IsExpDateInputValid(tc.expirationDate)
 			if tc.expected != got {
 				t.Errorf("isExpDateInputValid(%q) = %t; expected %t", tc.expirationDate, got, tc.expected)
 			}
