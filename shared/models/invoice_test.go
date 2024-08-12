@@ -42,7 +42,7 @@ func TestIsPricePerItemInputValid(t *testing.T) {
 	}{
 		{"Valid price - single digit", "5", true},
 		{"Valid price - multiple digits", "123", true},
-		{"Valid price - zero", "0", true},
+		{"Invalid price - zero", "0", false},
 		{"Invalid price - negative", "-5", false},
 		{"Invalid price - decimal", "5.5", false},
 		{"Invalid price - contains letters", "5a", false},
@@ -118,11 +118,12 @@ func TestIsExpDateInputValid(t *testing.T) {
 		{"Invalid format non-digit", "0a/2025", false},
 		{"Invalid format too short", "8/2024", false},
 		{"Invalid format too long", "08/245", false},
+		{"Empty string", "", false},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-      got := IsExpDateInputValid(tc.expirationDate)
+			got := IsExpDateInputValid(tc.expirationDate)
 			if tc.expected != got {
 				t.Errorf("isExpDateInputValid(%q) = %t; expected %t", tc.expirationDate, got, tc.expected)
 			}
@@ -201,6 +202,33 @@ func TestIsCVVInputValid(t *testing.T) {
 			got := isCVVInputValid(tc.input)
 			if tc.expected != got {
 				t.Errorf("isCVVInputValid(%q) = %t; expected %t", tc.input, got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestIsItemNameInputValid(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Empty string", "", false},
+		{"Single character", "a", true},
+		{"Normal item name", "T-shirt", true},
+		{"Item name with numbers", "iPhone 12", true},
+		{"Item name with special characters", "Levi's 501", true},
+		{"Long item name", "Super Deluxe Ultra Mega Hyper Extreme Gizmo 3000 XL", true},
+		{"Only whitespace", "   ", true}, // Note: This returns true as per current implementation
+		{"Item name with Unicode characters", "Café au lait", true},
+		{"Item name with emojis", "🍕 Pizza", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := isItemNameInputValid(tc.input)
+			if got != tc.expected {
+				t.Errorf("isItemNameInputValid(%q) = %v; want %v", tc.input, got, tc.expected)
 			}
 		})
 	}
