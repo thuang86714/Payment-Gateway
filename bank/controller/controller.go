@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"fmt"
 	"github.com/gin-gonic/gin"
 
 	"github.com/processout-hiring/payment-gateway-thuang86714/bank/service"
@@ -16,23 +15,42 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-// CreateTransaction
+// ProcessTransaction will take transactionWithPSP from gateway, process the transaction and respond postResponse
 func (ctr *Controller) ProcessTransaction(c *gin.Context) {
-	//passed by middlewareBank.SendInitialResponse()
-	transactionInterface, exists := c.Get("transaction")
-	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction not found in context"})
+	var curTransactionWithPSP models.TransactionWithPSP
+	if err := c.ShouldBindJSON(&curTransactionWithPSP); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
 		return
 	}
 
-	curTransactionWithPSP, ok := transactionInterface.(models.TransactionWithPSP)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid transaction data"})
+	// Check if invoice ID already exists
+	if service.DoesInvoiceExists(curTransactionWithPSP.InvoiceID) {
+		initialResponse, err := service.CreateResponse(curTransactionWithPSP, "failed: invoiceID already exists")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create response"})
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusConflict, initialResponse)
+		c.Abort()
 		return
 	}
 
-	if err := service.ProcessTransaction(curTransactionWithPSP); err != nil{
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to process transaction, error = %v", err)})
+	// Store the invoice ID
+	if err := service.StoreInvoiceID(curTransactionWithPSP.InvoiceID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store invoice ID"})
 		return
 	}
+
+	// Create and send initial "processing" response
+	response, err := service.CreateResponse(curTransactionWithPSP, "done")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create response"})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusAccepted, response)
 }
