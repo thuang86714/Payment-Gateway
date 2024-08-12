@@ -52,5 +52,5 @@ func (ctr *Controller) ProcessTransaction(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response)
+	c.JSON(http.StatusOK, response)
 }
