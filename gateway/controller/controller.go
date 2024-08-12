@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,7 @@ func (ctr *Controller) CreateTransaction(c *gin.Context) {
 	postResponse, err := service.PostTransactionToBank(transaction)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("error posting transaction: %v", err)})
+        log.Printf("failed at post transaction to Bank, with error = %v", err)
 		return
 	}
 
