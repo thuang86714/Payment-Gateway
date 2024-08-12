@@ -7,6 +7,60 @@ import (
 	"github.com/Rhymond/go-money"
 )
 
+func TestIsQuantityInputValid(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Valid quantity - single digit", "5", true},
+		{"Valid quantity - multiple digits", "123", true},
+		{"Invalid quantity - zero", "0", false},
+		{"Invalid quantity - negative", "-5", false},
+		{"Invalid quantity - decimal", "5.5", false},
+		{"Invalid quantity - contains letters", "5a", false},
+		{"Invalid quantity - contains special characters", "5!", false},
+		{"Empty string", "", false},
+		{"Valid quantity - large number", "999999", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := isQuantityInputValid(tc.input)
+			if tc.expected != got {
+				t.Errorf("isQuantityInputValid(%q) = %t; expected %t", tc.input, got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestIsPricePerItemInputValid(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Valid price - single digit", "5", true},
+		{"Valid price - multiple digits", "123", true},
+		{"Valid price - zero", "0", true},
+		{"Invalid price - negative", "-5", false},
+		{"Invalid price - decimal", "5.5", false},
+		{"Invalid price - contains letters", "5a", false},
+		{"Invalid price - contains special characters", "5!", false},
+		{"Empty string", "", false},
+		{"Valid price - large number", "999999", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := isPricePerItemInputValid(tc.input)
+			if tc.expected != got {
+				t.Errorf("isPricePerItemInputValid(%q) = %t; expected %t", tc.input, got, tc.expected)
+			}
+		})
+	}
+}
+
 func TestIsCardNumberInputValid(t *testing.T) {
 	var testcase = []struct {
 		name     string
@@ -68,7 +122,7 @@ func TestIsExpDateInputValid(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := IsExpDateInputValid(tc.expirationDate)
+      got := IsExpDateInputValid(tc.expirationDate)
 			if tc.expected != got {
 				t.Errorf("isExpDateInputValid(%q) = %t; expected %t", tc.expirationDate, got, tc.expected)
 			}
@@ -137,6 +191,9 @@ func TestIsCVVInputValid(t *testing.T) {
 		{"Invalid CVV - contains special character", "12!", false},
 		{"Empty CVV", "", false},
 		{"Valid CVV - leading zero", "012", true},
+		{"Valid CVV - all zeros", "000", true},
+		{"Invalid CVV - spaces", "1 23", false},
+		{"Invalid CVV - negative", "-123", false},
 	}
 
 	for _, tc := range testCases {
@@ -162,6 +219,10 @@ func TestIsInvoiceIDInputValid(t *testing.T) {
 		{"Non-numeric characters in suffix", "INVD12345678ABCD", false},
 		{"Empty string", "", false},
 		{"Valid invoice ID with leading zeros", "INVD000000000001", true},
+		{"Invalid - lowercase prefix", "invd123456789012", false},
+		{"Invalid - spaces", "INVD 12345678901", false},
+		{"Invalid - special characters", "INVD12345678901!", false},
+		{"Invalid - all letters", "INVDABCDEFGHIJKL", false},
 	}
 
 	for _, tc := range testCases {
