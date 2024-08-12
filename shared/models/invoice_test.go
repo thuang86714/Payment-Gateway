@@ -7,6 +7,60 @@ import (
 	"github.com/Rhymond/go-money"
 )
 
+func TestIsQuantityInputValid(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Valid quantity - single digit", "5", true},
+		{"Valid quantity - multiple digits", "123", true},
+		{"Invalid quantity - zero", "0", false},
+		{"Invalid quantity - negative", "-5", false},
+		{"Invalid quantity - decimal", "5.5", false},
+		{"Invalid quantity - contains letters", "5a", false},
+		{"Invalid quantity - contains special characters", "5!", false},
+		{"Empty string", "", false},
+		{"Valid quantity - large number", "999999", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := isQuantityInputValid(tc.input)
+			if tc.expected != got {
+				t.Errorf("isQuantityInputValid(%q) = %t; expected %t", tc.input, got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestIsPricePerItemInputValid(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Valid price - single digit", "5", true},
+		{"Valid price - multiple digits", "123", true},
+		{"Invalid price - zero", "0", false},
+		{"Invalid price - negative", "-5", false},
+		{"Invalid price - decimal", "5.5", false},
+		{"Invalid price - contains letters", "5a", false},
+		{"Invalid price - contains special characters", "5!", false},
+		{"Empty string", "", false},
+		{"Valid price - large number", "999999", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := isPricePerItemInputValid(tc.input)
+			if tc.expected != got {
+				t.Errorf("isPricePerItemInputValid(%q) = %t; expected %t", tc.input, got, tc.expected)
+			}
+		})
+	}
+}
+
 func TestIsCardNumberInputValid(t *testing.T) {
 	var testcase = []struct {
 		name     string
@@ -64,6 +118,7 @@ func TestIsExpDateInputValid(t *testing.T) {
 		{"Invalid format non-digit", "0a/2025", false},
 		{"Invalid format too short", "8/2024", false},
 		{"Invalid format too long", "08/245", false},
+		{"Empty string", "", false},
 	}
 
 	for _, tc := range testCases {
@@ -137,6 +192,9 @@ func TestIsCVVInputValid(t *testing.T) {
 		{"Invalid CVV - contains special character", "12!", false},
 		{"Empty CVV", "", false},
 		{"Valid CVV - leading zero", "012", true},
+		{"Valid CVV - all zeros", "000", true},
+		{"Invalid CVV - spaces", "1 23", false},
+		{"Invalid CVV - negative", "-123", false},
 	}
 
 	for _, tc := range testCases {
@@ -144,6 +202,33 @@ func TestIsCVVInputValid(t *testing.T) {
 			got := isCVVInputValid(tc.input)
 			if tc.expected != got {
 				t.Errorf("isCVVInputValid(%q) = %t; expected %t", tc.input, got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestIsItemNameInputValid(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Empty string", "", false},
+		{"Single character", "a", true},
+		{"Normal item name", "T-shirt", true},
+		{"Item name with numbers", "iPhone 12", true},
+		{"Item name with special characters", "Levi's 501", true},
+		{"Long item name", "Super Deluxe Ultra Mega Hyper Extreme Gizmo 3000 XL", true},
+		{"Only whitespace", "   ", true}, // Note: This returns true as per current implementation
+		{"Item name with Unicode characters", "Café au lait", true},
+		{"Item name with emojis", "🍕 Pizza", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := isItemNameInputValid(tc.input)
+			if got != tc.expected {
+				t.Errorf("isItemNameInputValid(%q) = %v; want %v", tc.input, got, tc.expected)
 			}
 		})
 	}
@@ -162,6 +247,10 @@ func TestIsInvoiceIDInputValid(t *testing.T) {
 		{"Non-numeric characters in suffix", "INVD12345678ABCD", false},
 		{"Empty string", "", false},
 		{"Valid invoice ID with leading zeros", "INVD000000000001", true},
+		{"Invalid - lowercase prefix", "invd123456789012", false},
+		{"Invalid - spaces", "INVD 12345678901", false},
+		{"Invalid - special characters", "INVD12345678901!", false},
+		{"Invalid - all letters", "INVDABCDEFGHIJKL", false},
 	}
 
 	for _, tc := range testCases {
