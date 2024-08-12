@@ -49,7 +49,7 @@ func PostTransactionToBank(curTransactionWithPSP models.TransactionWithPSP) (mod
 
 	// Send the request
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 15 * time.Second,
 	}
 	resp, err := client.Do(req)
 	if err != nil {
