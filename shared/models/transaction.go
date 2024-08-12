@@ -9,4 +9,5 @@ type TransactionWithPSP struct {
 	ExpirationDate  string  `json:"expirationDate"`
 	ServiceProvider string  `json:"serviceProvider"`
 	ServiceFee      float64 `json:"serviceFee"`
+	Currency       string `json:"currency"`
 }
