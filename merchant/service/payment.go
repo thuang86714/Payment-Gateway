@@ -23,7 +23,7 @@ func processPayment() error {
 	}
 
 	//print the response
-	fmt.Printf("Response from service: \n InvoiceID: %s\n Status Code: %s\n. Retrieve: %f %s", curResponse.InvoiceID, curResponse.StatusCode, curResponse.AmountReceived, curResponse.Currency)
+	fmt.Printf("Response from service: \nInvoiceID: %s\nStatus Code: %s\nRetrieve: %f %s\n", curResponse.InvoiceID, curResponse.StatusCode, curResponse.AmountReceived, curResponse.Currency)
 	
 	return nil
 }
@@ -40,7 +40,7 @@ func retrievePayment() error {
 	}
 
 	//print the response
-	fmt.Printf("Response from service: \n InvoiceID: %s\n Status Code: %s\n Masked Card Number: %s\n Masked Expiration Date: %s", invoiceID, curResponse.StatusCode, curResponse.MaskedCardNumber, curResponse.MaskedExpirationDate)
+	fmt.Printf("Response from service: \nInvoiceID: %s\nStatus Code: %s\nMasked Card Number: %s\nMasked Expiration Date: %s\n", invoiceID, curResponse.StatusCode, curResponse.MaskedCardNumber, curResponse.MaskedExpirationDate)
 
 	return nil
 }
@@ -68,7 +68,7 @@ func postPayment(curInvoice models.Invoice) (models.PostResponse, error) {
 
 	// Send the request
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 15 * time.Second,
 	}
 	resp, err := client.Do(req)
 	if err != nil {
