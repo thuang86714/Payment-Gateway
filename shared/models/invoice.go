@@ -96,7 +96,7 @@ func TakeInputForOldInvoice() string {
 func takeCardNumberForNewInvoice(reader *bufio.Reader) string {
 	var cardNumber string
 	for {
-		fmt.Printf("Please enter the card number: ")
+		fmt.Printf("If you enter 1234567812345678, you will send test request to gateway. But no transaction will be sent to bank\nPlease enter the card number: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			logFatalError(err)
