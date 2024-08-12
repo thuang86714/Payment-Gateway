@@ -21,6 +21,7 @@ func (p PSPFactory) newTransaction(invoice models.Invoice, invoiceID string, fee
 		CVV:             invoice.CVV,
 		ExpirationDate:  invoice.ExpirationDate,
 		ServiceProvider: p.ProviderName,
+		Currency:        invoice.Currency,
 	}
 }
 
