@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//Exec() initialize all necessary functions to take input from merchant
 func Exec() {
 	//load .env parameters
 	loadEnv()
