@@ -4,7 +4,7 @@
 ### [2. Any assumption you made](#Any-assumptions-you-made?)
 ### [3. Areas for improvenment](#Areas-for-improvenment)
 ### [4. What cloud technologies you'd use and why?](#What-cloud-technologies-you'd-use-and-why?)
-### [5. Overall Architecture](#Overall-Architecture)
+### [5. Overall Architecture for future](#Overall-Architecture-for-future)
 ### [6. Links to other documents](#Links-to-other-documents)
 ##  1. How to run your solution?
   Whichever approach you choose, clone this repository first.<br>
@@ -80,7 +80,7 @@
   <li>Nginx:<br> Nginx would be deployed as an Ingress Controller within the EKS cluster, handling incoming traffic, load balancing, and SSL termination for the services. It provides efficient request routing and can be easily configured for various traffic management scenarios. </li>
 </ol>
 
-##  5. Overall Architecture
+##  5. Overall Architecture for future
 ![Architecture](https://github.com/user-attachments/assets/ac6560de-a41a-4f43-b41b-c7b43b456c76)
 
 ##  6. Links to other documents
