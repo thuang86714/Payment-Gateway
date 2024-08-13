@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  bank_db:
+    image: postgres:13
+    container_name: bank-postgres
+    environment:
+      POSTGRES_USER: Tommy
+      POSTGRES_PASSWORD: test123
+      POSTGRES_DB: bank_dev
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Tommy -d bank_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  gateway_db:
+    image: postgres:13
+    container_name: gateway-postgres
+    environment:
+      POSTGRES_USER: Tommy
+      POSTGRES_PASSWORD: test123
+      POSTGRES_DB: gateway_dev
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Tommy -d gateway_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+
+  bank:
+    image: tommyhuanghhh/paymentgateway-bank:latest
+    container_name: bank-service
+    depends_on:
+      bank_db:
+        condition: service_healthy
+    environment:
+      GATEWAY_URL: http://gateway:8081
+      BANK_PORT: :8082
+      BANK_URL: http://bank
+      POSTGRES_HOST: bank-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: Tommy
+      POSTGRES_PASSWORD: test123
+      POSTGRES_DB: bank_dev
+    ports:
+      - "8082:8082"
+
+  gateway:
+    image: tommyhuanghhh/paymentgateway-gateway:latest
+    container_name: gateway-service
+    depends_on:
+      gateway_db:
+        condition: service_healthy
+    environment:
+      BANK_URL: http://bank:8082
+      GATEWAY_PORT: :8081
+      GATEWAY_URL: http://gateway
+      POSTGRES_HOST: gateway_db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: Tommy
+      POSTGRES_PASSWORD: test123
+      POSTGRES_DB: gateway_dev
+    ports:
+      - "8081:8081"
+
+  merchant:
+    image: tommyhuanghhh/paymentgateway-merchant:latest
+    container_name: merchant-service
+    tty: true
+    stdin_open: true
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["while true; do ./main; done"]
+    environment:
+      GATEWAY_URL: http://gateway:8081
+    depends_on:
+      - gateway
+
+networks:
+  default:
+    name: paymentgateway-network
