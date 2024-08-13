@@ -1,5 +1,6 @@
 package models
 
+// transactionWithPSP represents the transactionWithPSP object
 type TransactionWithPSP struct {
 	InvoiceID       string  `json:"invoiceID"`
 	AmountPayable   float64 `json:"amountPayable"`
