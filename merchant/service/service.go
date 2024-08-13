@@ -14,6 +14,8 @@ func Exec() {
 	//load .env parameters
 	loadEnv()
 
+	//press any button to continue
+	pressButton()
 
 	//Greet the merchant
 	fmt.Printf("Dear Merchant, Welcome to Tommy's Payment Gateway!\n")
@@ -25,6 +27,12 @@ func Exec() {
 			log.Printf("Error: %v\n", err)
 		}
 	}
+}
+
+//pressButton to press any button to continue
+func pressButton(){
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
 }
 
 //load from .env
