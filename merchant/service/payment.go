@@ -91,6 +91,7 @@ func postPayment(curInvoice models.Invoice) (models.PostResponse, error) {
 	return postResponse, nil
 }
 
+// getPayment retrieves the payment record from the gateway service
 func getPayment(invoiceID string) (models.GetResponse, error) {
 	url := os.Getenv("GATEWAY_URL")
 	if url == "" {
