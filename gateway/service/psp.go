@@ -11,6 +11,7 @@ type PSPFactory struct {
 	ProviderName string
 }
 
+// newTransaction creates a new TransactionWithPSP instance
 func (p PSPFactory) newTransaction(invoice models.Invoice, invoiceID string, feePercentage float64) models.TransactionWithPSP {
 	return models.TransactionWithPSP{
 		InvoiceID:       invoiceID,
@@ -25,6 +26,7 @@ func (p PSPFactory) newTransaction(invoice models.Invoice, invoiceID string, fee
 	}
 }
 
+// funcMap is a map of PSP factories, keyed by an integer identifier
 var funcMap = map[int]PSPFactory{
 	0: {ProviderName: "Checkout.com"},
 	1: {ProviderName: "Stripe"},
@@ -34,6 +36,7 @@ var funcMap = map[int]PSPFactory{
 	5: {ProviderName: "Paypal"},
 }
 
+// NewTransactionWithPSP creates a new transaction with a selected PSP
 func NewTransactionWithPSP(curInvoice models.Invoice, invoiceID string) models.TransactionWithPSP {
 	//decided which PSP benefit the merchant the most
 	curPSP, feePercentage := decidePSP()

@@ -13,7 +13,8 @@ import (
 	"github.com/processout-hiring/payment-gateway-thuang86714/shared/models"
 )
 
-// PostTransaction sends the transaction to the bank service and handles the response.
+// PostTransactionToBank sends the transaction to the bank service and handles the response.
+// It returns a PostResponse and an error.
 func PostTransactionToBank(curTransactionWithPSP models.TransactionWithPSP) (models.PostResponse, error) {
 	url := os.Getenv("BANK_URL")
 	if url == "" {
@@ -72,7 +73,8 @@ func PostTransactionToBank(curTransactionWithPSP models.TransactionWithPSP) (mod
 	return postResponse, nil
 }
 
-// GetTransactionByInvoiceID get previously-made transaction record(PostResponse) by invoiceID, return GetResponse
+// GetTransactionByInvoiceID retrieves a previously-made transaction record (PostResponse) by invoiceID.
+// It returns a GetResponse and an error.
 func GetTransactionByInvoiceID(invoiceID string) (models.GetResponse, error) {
 	postResponse, err := repository.GetTransaction(invoiceID)
 	if err != nil {
@@ -101,10 +103,14 @@ func GetTransactionByInvoiceID(invoiceID string) (models.GetResponse, error) {
 	return getResponse, nil
 }
 
+// CreateTransactionToDB creates a new transaction record in the database.
+// It returns an error if the operation fails.
 func CreateTransactionToDB(response *models.PostResponse) error {
 	return repository.CreateTransaction(response)
 }
 
+// UpdateTransactionInDB updates an existing transaction record in the database.
+// It returns an error if the operation fails.
 func UpdateTransactionInDB(response *models.PostResponse) error {
 	return repository.UpdateTransaction(response)
 }
