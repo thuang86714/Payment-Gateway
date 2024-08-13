@@ -26,7 +26,7 @@ type Invoice struct {
 	Total          int    `json:"total"`
 }
 
-// InvoiceID represents the invoiceID string
+// InvoiceID represents the invoiceID string and works as a schema for db Auto-migration
 type InvoiceID struct {
 	ID string `gorm:"primaryKey"`
 }
@@ -134,7 +134,7 @@ func takeExpirationDateForNewInvoice(reader *bufio.Reader) string {
 	return expirationDate
 }
 
-// takeItemForNewInvoice takes item from the merchant, return item
+// takeItemForNewInvoice takes item from the merchant, return item name
 func takeItemForNewInvoice(reader *bufio.Reader) string {
 	var itemName string
 	for {
@@ -344,6 +344,7 @@ func isCardValid(cardNumber, cVV, expirationDate string) bool {
 // isCurrencyInputValid checks if the input is a valid currency, return bool
 var getCurrency = money.GetCurrency
 
+//isCurrencyInputValid uses external package to check whether the input is valid 
 func isCurrencyInputValid(code string) bool {
 	if len(code) == 0 {
 		return false
@@ -438,6 +439,7 @@ func printInvalidInput(invalidInput string) {
 	log.Printf("%s is not a valid input, please try again.\n", invalidInput)
 }
 
+//printInvalidInput logs fatal error
 func logFatalError(err error) {
 	log.Fatal("Error reading input:", err)
 }

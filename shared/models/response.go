@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// PostResponse represents the post response object
 type PostResponse struct {
 	gorm.Model
     CardNumber      string  `json:"cardNumber"`
@@ -17,6 +18,7 @@ type PostResponse struct {
     AmountReceived  float64 `json:"amountReceived"`
 }
 
+// GettResponse represents the get response object
 type GetResponse struct {
 	MaskedCardNumber     string `json:"maskedCardNumber"`
 	MaskedExpirationDate string `json:"maskedExpirationDate"`

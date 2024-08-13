@@ -15,6 +15,7 @@ TODO: current implementation brings several problems:
 */
 
 // UpdateBalance adds the specified amount to the current balance for the given currency.
+// It uses a database transaction to ensure atomicity.
 func UpdateBalance(currency string, amountToAdd float64) error {
 	return db.DB.Transaction(func(tx *gorm.DB) error {
         var balance models.Balance
@@ -32,6 +33,8 @@ func UpdateBalance(currency string, amountToAdd float64) error {
 	})
 }
 
+// InvoiceExists checks if an invoice with the given ID already exists in the database.
+// It returns a boolean indicating existence and an error if the database operation fails.
 func InvoiceExists(invoiceID string) (bool, error) {
 	var count int64
 	err := db.DB.Model(&models.InvoiceID{}).Where("id = ?", invoiceID).Count(&count).Error
@@ -41,6 +44,8 @@ func InvoiceExists(invoiceID string) (bool, error) {
 	return count > 0, nil
 }
 
+// StoreInvoice saves a new invoice ID to the database.
+// It returns an error if the operation fails.
 func StoreInvoice(invoiceID string) error {
 	return db.DB.Create(&models.InvoiceID{ID: invoiceID}).Error
 }

@@ -11,6 +11,8 @@ import (
 	"github.com/processout-hiring/payment-gateway-thuang86714/shared/models"
 )
 
+// maskExpirationDate masks the first two characters of the expiration date
+// It returns an error if the input format is incorrect
 func maskExpirationDate(expirationDate string) (string, error) {
 	if !models.IsExpDateInputValid(expirationDate) {
 		return "", fmt.Errorf("Expiration Date format incorrect, got = %s", expirationDate)
@@ -19,6 +21,7 @@ func maskExpirationDate(expirationDate string) (string, error) {
 }
 
 // maskCardNumber masks the first 12 digits of the card number, return string
+// It returns an error if the input format is incorrect
 func maskCardNumber(cardNumber string) (string, error) {
 	if !models.IsCardNumberInputValid(cardNumber) {
 		return "", fmt.Errorf("cardNumber format incorrect")
