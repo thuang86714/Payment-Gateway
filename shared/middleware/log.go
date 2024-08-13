@@ -7,6 +7,7 @@ import (
     "github.com/gin-gonic/gin"
 )
 
+//LoggingMiddleware() as a middleware, logs all incoming requests
 func LoggingMiddleware() gin.HandlerFunc {
     return func(c *gin.Context) {
         // Start timer
