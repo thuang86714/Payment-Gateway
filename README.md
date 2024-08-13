@@ -1,6 +1,12 @@
 ﻿# payment-gateway-thuang86714
 ## Content Table
-###  1. How to run your solution?
+### [1. How to run your solution?](#How-to-run-your-solution?)
+### [2. Any assumption you made](#Any-assumptions-you-made?)
+### [3. Areas for improvenment](#Areas-for-improvenment)
+### [4. What cloud technologies you'd use and why?](#What-cloud-technologies-you'd-use-and-why?)
+### [5. Overall Architecture](#Overall-Architecture)
+### [6. Links to other documents](#Links-to-other-documents)
+##  1. How to run your solution?
   Whichever approach you choose, clone this repository first.<br>
   a. Docker && Docker-Compose<br>
       This approach assumes you already have docker installed. 
@@ -44,14 +50,14 @@
          ```<br>
          or you could run every CI pipelines if you have act installed<br>
          </ol>
-###  2. Any assumptions you made?
+##  2. Any assumptions you made?
   <ol>
         <li>Customers always have sufficient funds for each transaction: transactions won't fail because of lack of fund</li>
         <li>It's always Merchant Initialized Transaction(MIT): gateway doesn't turn to customer for card authorization</li>
         <li>This gateway serves only one merchant: no authentication nor authorization mechnaism</li>
   </ol>
   
-###  3. Areas for improvenment
+##  3. Areas for improvenment
 <ol>
   <li>Dependency Injection: current implementation of repository brings several problem:<br>
     <ol>
@@ -61,18 +67,24 @@
     </ol>
   </li>
   <li>Authentication and Authorization for both merchant and customers</li>
-  <li>Platform Implementation: there are two functions in gateway/service [decidePSP](https://github.com/processout-hiring/payment-gateway-thuang86714/blob/master/gateway/service/psp.go#L48) and [decideServiceFeePercentage](https://github.com/processout-hiring/payment-gateway-thuang86714/blob/master/gateway/service/psp.go#L56) which simulates what ProcessOut is doing. 
-   </li>
-  <li>How Bank process transaction: In bank/service, there's a functions [validateTransaction](https://github.com/processout-hiring/payment-gateway-thuang86714/blob/master/bank/service/service.go#L12) simulates the time it takes to validate a transaction</li>
+  <li>Platform Implementation: there are two functions in gateway/service decidePSP() and decideServiceFeePercentage() which simulates what ProcessOut is doing. </li>
+  <li>How Bank process transaction: In bank/service, there's a functions validateTransaction() simulates the time it takes to validate a transaction</li>
   <li>Deployment: this repos doesn't include any deployment onto cloud</li>
   
 </ol>
-###  4. What cloud technologies you'd use and why?
-<ol>
-  <li>AWS EKS for merchant/gateway/bank:</li>
-  <li>AWS RDS with read replica:</li>
-  <li>Nginx and Redis:</li>
-</ol>
-###  5. Overall Architecture
-###  6. Links to other documents
 
+4. What cloud technologies you'd use and why?
+<ol>
+  <li>AWS EKS for merchant/gateway/bank:<br> Amazon Elastic Kubernetes Service (EKS) would be used to deploy and manage the merchant, gateway, and bank services. EKS provides a managed Kubernetes platform, allowing for easy orchestration and scaling of containerized applications. It offers high availability, security, and seamless integration with other AWS services. EKS is ideal for these microservices as it enables efficient resource utilization, easy updates, and robust monitoring capabilities.</li>
+  <li>AWS RDS with read replica:<br> Amazon Relational Database Service (RDS) with PostgreSQL engine would be employed for the primary database, with a read replica for improved read performance and high availability. RDS offers automated backups, patching, and scaling, reducing administrative overhead. The read replica helps distribute read traffic, improving overall application performance and providing a failover option in case of primary database issues.</li>
+  <li>Nginx:<br> Nginx would be deployed as an Ingress Controller within the EKS cluster, handling incoming traffic, load balancing, and SSL termination for the services. It provides efficient request routing and can be easily configured for various traffic management scenarios. </li>
+</ol>
+
+##  5. Overall Architecture
+![Architecture](https://github.com/user-attachments/assets/ac6560de-a41a-4f43-b41b-c7b43b456c76)
+
+##  6. Links to other documents
+####  [Shared]()
+####  [merchant]()
+####  [gateway]()
+####  [bank]()
