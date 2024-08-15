@@ -190,6 +190,7 @@ func takePricePerItemForNewInvoice(reader *bufio.Reader) int {
 		priceStr := strings.TrimSpace(input)
 		//do input check
 		if isPricePerItemInputValid(priceStr) {
+			pricePerItem, _ = strconv.Atoi(priceStr)
 			break
 		}
 		//print invalid input
