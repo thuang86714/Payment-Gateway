@@ -8,11 +8,13 @@ import (
 	"github.com/processout-hiring/payment-gateway-thuang86714/shared/models"
 )
 
-type Controller struct{}
+type Controller struct{
+	svc *service.Service
+}
 
 // NewUserController creates a new UserController
-func NewController() *Controller {
-	return &Controller{}
+func NewController(svc *service.Service) *Controller {
+	return &Controller{svc: svc}
 }
 
 // ProcessTransaction will take transactionWithPSP from gateway, process the transaction and respond postResponse
@@ -25,8 +27,8 @@ func (ctr *Controller) ProcessTransaction(c *gin.Context) {
 	}
 
 	// Check if invoice ID already exists
-	if service.DoesInvoiceExists(curTransactionWithPSP.InvoiceID) {
-		initialResponse, err := service.CreateResponse(curTransactionWithPSP, "failed: invoiceID already exists")
+	if ctr.svc.DoesInvoiceExists(curTransactionWithPSP.InvoiceID) {
+		initialResponse, err := ctr.svc.CreateResponse(curTransactionWithPSP, "failed: invoiceID already exists")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create response"})
 			c.Abort()
@@ -39,13 +41,13 @@ func (ctr *Controller) ProcessTransaction(c *gin.Context) {
 	}
 
 	// Store the invoice ID
-	if err := service.StoreInvoiceID(curTransactionWithPSP.InvoiceID); err != nil {
+	if err := ctr.svc.StoreInvoiceID(curTransactionWithPSP.InvoiceID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store invoice ID"})
 		return
 	}
 
 	// Create and send initial "processing" response
-	response, err := service.CreateResponse(curTransactionWithPSP, "done")
+	response, err := ctr.svc.CreateResponse(curTransactionWithPSP, "done")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create response"})
 		c.Abort()

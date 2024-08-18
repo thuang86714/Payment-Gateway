@@ -8,22 +8,35 @@ import (
 	"github.com/processout-hiring/payment-gateway-thuang86714/bank/repository"
 )
 
+
+
+type Service struct {
+    repo repository.Repository
+}
+
+func NewService(repo repository.Repository) *Service {
+    return &Service{repo: repo}
+}
+
 //validateTransaction simulates the complicated payment processing(KYC, AML, Anti-Terrorism....) in the bank. For simplicity, it would just sleep for 10 seconds
-func validateTransaction(){
+func (s *Service) validateTransaction(){
 	//sleep for 10 sec to reprsent time it takes to really process a payment
 	time.Sleep(10 * time.Second)
 	log.Println("Transaction validation completed!")
 }
 
-func CreateResponse(curTransactionWithPSP models.TransactionWithPSP, curStatus string) (models.PostResponse, error){
+func (s *Service) CreateResponse(curTransactionWithPSP models.TransactionWithPSP, curStatus string) (models.PostResponse, error){
 	var received float64
 	var serviceFee float64
 	//if it's a valid transaction, do processing
 	if curStatus == "done" {
-		validateTransaction()
+		s.validateTransaction()
 
 		//change account balance
-		addToBalance(curTransactionWithPSP.Currency, curTransactionWithPSP.AmountReceived)
+		err := s.AddToBalance(curTransactionWithPSP.Currency, curTransactionWithPSP.AmountReceived)
+		if err != nil {
+            return models.PostResponse{}, err
+        }
 		//only if invoiceID is a new one, we add to the balance. Hence return response with AmountReceived and charge service fee
 		received = curTransactionWithPSP.AmountReceived
 		serviceFee = curTransactionWithPSP.ServiceFee
@@ -44,8 +57,8 @@ func CreateResponse(curTransactionWithPSP models.TransactionWithPSP, curStatus s
 	return curResponse, nil
 }
 
-func DoesInvoiceExists(invoiceID string) bool {
-	exists, err := repository.InvoiceExists(invoiceID)
+func (s *Service) DoesInvoiceExists(invoiceID string) bool {
+	exists, err := s.repo.InvoiceExists(invoiceID)
 	if err != nil {
 		log.Printf("Error checking if invoice exists: %v", err)
 		return false // Assume it doesn't exist in case of error
@@ -53,6 +66,11 @@ func DoesInvoiceExists(invoiceID string) bool {
 	return exists
 }
 
-func StoreInvoiceID(invoiceID string) error {
-	return repository.StoreInvoice(invoiceID)
+func (s *Service) StoreInvoiceID(invoiceID string) error {
+	return s.repo.StoreInvoice(invoiceID)
+}
+
+//AddToBalance adds the specified amount to the current balance for the given currency
+func (s *Service) AddToBalance(currency string, amount float64) error {
+	return s.repo.UpdateBalance(currency, amount)
 }

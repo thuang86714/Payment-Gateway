@@ -8,13 +8,11 @@ import (
 )
 
 // SetRoutes sets up the routes for the application
-func SetRoutes(router *gin.Engine) *gin.Engine {
+func SetRoutes(router *gin.Engine, ctr *controller.Controller) *gin.Engine {
 	// Apply middleware globally
 	router.Use(middleware.LoggingMiddleware())
 
-	// Initialize controllers
-	curController := controller.NewController()
-	router.POST("/processTransaction", curController.ProcessTransaction)
+	router.POST("/processTransaction", ctr.ProcessTransaction)
 
 	return router
 }

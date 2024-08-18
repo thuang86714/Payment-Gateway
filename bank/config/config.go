@@ -27,29 +27,37 @@ type confVars struct {
 	malformed []string // errors describing malformed environment variable values
 }
 
-var Conf *Config
+type EnvReader interface {
+    Getenv(key string) string
+}
 
-func New() (*Config, error) {
+type OsEnvReader struct{}
+
+func (OsEnvReader) Getenv(key string) string {
+    return os.Getenv(key)
+}
+
+func New(envReader EnvReader) (*Config, error) {
 	vars := &confVars{}
 
-	postgresHost := vars.mandatory("POSTGRES_HOST")
-	postgresPort := vars.mandatory("POSTGRES_PORT")
-	postgresUser := vars.mandatory("POSTGRES_USER")
-	postgresDB := vars.mandatory("POSTGRES_DB")
-	postgresPassword := vars.mandatory("POSTGRES_PASSWORD")
+	postgresHost := vars.mandatory(envReader, "POSTGRES_HOST")
+	postgresPort := vars.mandatory(envReader, "POSTGRES_PORT")
+	postgresUser := vars.mandatory(envReader, "POSTGRES_USER")
+	postgresDB := vars.mandatory(envReader, "POSTGRES_DB")
+	postgresPassword := vars.mandatory(envReader, "POSTGRES_PASSWORD")
 
-	postgresSSLMode := vars.optional("POSTGRES_SSL_MODE", "disable")
-	postgresRootCertLoc := vars.optional("POSTGRES_ROOT_CERT_LOC", "")
+	postgresSSLMode := vars.optional(envReader, "POSTGRES_SSL_MODE", "disable")
+	postgresRootCertLoc := vars.optional(envReader, "POSTGRES_ROOT_CERT_LOC", "")
 
-	postgresMaxOpenConns := vars.optionalInt("POSTGRES_MAX_OPEN_CONNS", 10)
-	postgresMaxIdleConns := vars.optionalInt("POSTGRES_MAX_IDLE_CONNS", 5)
-	postgresMaxIdleTime := vars.optionalDuration("POSTGRES_MAX_IDLE_TIME", 5*time.Minute)
+	postgresMaxOpenConns := vars.optionalInt(envReader, "POSTGRES_MAX_OPEN_CONNS", 10)
+	postgresMaxIdleConns := vars.optionalInt(envReader, "POSTGRES_MAX_IDLE_CONNS", 5)
+	postgresMaxIdleTime := vars.optionalDuration(envReader, "POSTGRES_MAX_IDLE_TIME", 5*time.Minute)
 
 	if err := vars.Error(); err != nil {
 		return nil, fmt.Errorf("error loading configuration: %w", err)
 	}
 
-	config := &Config{
+	return &Config{
 		PostgresHost:     postgresHost,
 		PostgresPort:     postgresPort,
 		PostgresUser:     postgresUser,
@@ -60,23 +68,19 @@ func New() (*Config, error) {
 		PostgresMaxOpenConns: postgresMaxOpenConns,
 		PostgresMaxIdleConns: postgresMaxIdleConns,
 		PostgresMaxIdleTime:  postgresMaxIdleTime,
-	}
-
-	Conf = config
-
-	return config, nil
+	}, nil
 }
 
-func (vars *confVars) optional(key, fallback string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return fallback
-	}
-	return value
+func (vars *confVars) optional(envReader EnvReader, key, fallback string) string {
+    value := envReader.Getenv(key)
+    if value == "" {
+        return fallback
+    }
+    return value
 }
 
-func (vars *confVars) optionalInt(key string, fallback int) int {
-	value := os.Getenv(key)
+func (vars *confVars) optionalInt(envReader EnvReader, key string, fallback int) int {
+	value := envReader.Getenv(key)
 	if value == "" {
 		return fallback
 	}
@@ -90,8 +94,8 @@ func (vars *confVars) optionalInt(key string, fallback int) int {
 	return valueInt
 }
 
-func (vars *confVars) optionalDuration(key string, fallback time.Duration) time.Duration {
-	value := os.Getenv(key)
+func (vars *confVars) optionalDuration(envReader EnvReader, key string, fallback time.Duration) time.Duration {
+	value := envReader.Getenv(key)
 	if value == "" {
 		return fallback
 	}
@@ -105,8 +109,8 @@ func (vars *confVars) optionalDuration(key string, fallback time.Duration) time.
 	return valueDuration
 }
 
-func (vars *confVars) mandatory(key string) string {
-	value := os.Getenv(key)
+func (vars *confVars) mandatory(envReader EnvReader, key string) string {
+	value := envReader.Getenv(key)
 	if value == "" {
 		vars.missing = append(vars.missing, key)
 	}
