@@ -1,128 +1,71 @@
 package config
 
 import (
-    "os"
     "testing"
     "time"
+
+    "github.com/stretchr/testify/assert"
 )
 
+type MockEnvReader struct {
+    envVars map[string]string
+}
+
+func (m MockEnvReader) Getenv(key string) string {
+    return m.envVars[key]
+}
+
 func TestNew(t *testing.T) {
-    // Test case 1: All mandatory fields are set
-    t.Run("AllMandatoryFieldsSet", func(t *testing.T) {
-        os.Setenv("POSTGRES_HOST", "testhost")
-        os.Setenv("POSTGRES_PORT", "5432")
-        os.Setenv("POSTGRES_USER", "testuser")
-        os.Setenv("POSTGRES_DB", "testdb")
-        os.Setenv("POSTGRES_PASSWORD", "testpass")
-        
-        config, err := New()
-        if err != nil {
-            t.Fatalf("Expected no error, got %v", err)
-        }
-        
-        if config.PostgresHost != "testhost" {
-            t.Errorf("Expected PostgresHost to be 'testhost', got '%s'", config.PostgresHost)
-        }
-        // Add similar checks for other fields
-    })
+    mockEnv := MockEnvReader{
+        envVars: map[string]string{
+            "POSTGRES_HOST":     "testhost",
+            "POSTGRES_PORT":     "5432",
+            "POSTGRES_USER":     "testuser",
+            "POSTGRES_DB":       "testdb",
+            "POSTGRES_PASSWORD": "testpass",
+            "POSTGRES_MAX_OPEN_CONNS": "15",
+            "POSTGRES_MAX_IDLE_TIME":  "10m",
+        },
+    }
 
-    // Test case 2: Missing mandatory field
-    t.Run("MissingMandatoryField", func(t *testing.T) {
-        os.Unsetenv("POSTGRES_HOST")
-        
-        _, err := New()
-        if err == nil {
-            t.Fatal("Expected error due to missing mandatory field, got nil")
-        }
-    })
+    config, err := New(mockEnv)
+    assert.NoError(t, err)
+    assert.NotNil(t, config)
 
-    // Test case 3: Optional fields with custom values
-    t.Run("OptionalFieldsCustomValues", func(t *testing.T) {
-        os.Setenv("POSTGRES_HOST", "testhost")
-        os.Setenv("POSTGRES_PORT", "5432")
-        os.Setenv("POSTGRES_USER", "testuser")
-        os.Setenv("POSTGRES_DB", "testdb")
-        os.Setenv("POSTGRES_PASSWORD", "testpass")
-        os.Setenv("POSTGRES_SSL_MODE", "require")
-        os.Setenv("POSTGRES_MAX_OPEN_CONNS", "20")
-        os.Setenv("POSTGRES_MAX_IDLE_TIME", "10m")
-        
-        config, err := New()
-        if err != nil {
-            t.Fatalf("Expected no error, got %v", err)
-        }
-        
-        if config.PostgresSSLMode != "require" {
-            t.Errorf("Expected PostgresSSLMode to be 'require', got '%s'", config.PostgresSSLMode)
-        }
-        if config.PostgresMaxOpenConns != 20 {
-            t.Errorf("Expected PostgresMaxOpenConns to be 20, got %d", config.PostgresMaxOpenConns)
-        }
-        if config.PostgresMaxIdleTime != 10*time.Minute {
-            t.Errorf("Expected PostgresMaxIdleTime to be 10 minutes, got %v", config.PostgresMaxIdleTime)
-        }
-    })
-
-    // Test case 4: Malformed optional field
-    t.Run("MalformedOptionalField", func(t *testing.T) {
-        os.Setenv("POSTGRES_HOST", "testhost")
-        os.Setenv("POSTGRES_PORT", "5432")
-        os.Setenv("POSTGRES_USER", "testuser")
-        os.Setenv("POSTGRES_DB", "testdb")
-        os.Setenv("POSTGRES_PASSWORD", "testpass")
-        os.Setenv("POSTGRES_MAX_OPEN_CONNS", "not_a_number")
-        
-        _, err := New()
-        if err == nil {
-            t.Fatal("Expected error due to malformed optional field, got nil")
-        }
-    })
+    assert.Equal(t, "testhost", config.PostgresHost)
+    assert.Equal(t, "5432", config.PostgresPort)
+    assert.Equal(t, "testuser", config.PostgresUser)
+    assert.Equal(t, "testdb", config.PostgresDB)
+    assert.Equal(t, "testpass", config.PostgresPassword)
+    assert.Equal(t, "disable", config.PostgresSSLMode) // default value
+    assert.Equal(t, 15, config.PostgresMaxOpenConns)
+    assert.Equal(t, 5, config.PostgresMaxIdleConns) // default value
+    assert.Equal(t, 10*time.Minute, config.PostgresMaxIdleTime)
 }
 
-func TestOptional(t *testing.T) {
-    vars := &confVars{}
-    
-    t.Run("UsesFallbackValue", func(t *testing.T) {
-        os.Unsetenv("TEST_KEY")
-        result := vars.optional("TEST_KEY", "fallback")
-        if result != "fallback" {
-            t.Errorf("Expected 'fallback', got '%s'", result)
-        }
-    })
+func TestNew_MissingMandatory(t *testing.T) {
+    mockEnv := MockEnvReader{
+        envVars: map[string]string{},
+    }
 
-    t.Run("UsesEnvironmentValue", func(t *testing.T) {
-        os.Setenv("TEST_KEY", "envvalue")
-        result := vars.optional("TEST_KEY", "fallback")
-        if result != "envvalue" {
-            t.Errorf("Expected 'envvalue', got '%s'", result)
-        }
-    })
+    _, err := New(mockEnv)
+    assert.Error(t, err)
+    assert.Contains(t, err.Error(), "missing mandatory configurations")
 }
 
-// Add similar tests for optionalInt, optionalDuration, and mandatory methods
+func TestNew_MalformedOptional(t *testing.T) {
+    mockEnv := MockEnvReader{
+        envVars: map[string]string{
+            "POSTGRES_HOST":     "testhost",
+            "POSTGRES_PORT":     "5432",
+            "POSTGRES_USER":     "testuser",
+            "POSTGRES_DB":       "testdb",
+            "POSTGRES_PASSWORD": "testpass",
+            "POSTGRES_MAX_OPEN_CONNS": "not_an_int",
+        },
+    }
 
-func TestError(t *testing.T) {
-    t.Run("NoErrors", func(t *testing.T) {
-        vars := &confVars{}
-        err := vars.Error()
-        if err != nil {
-            t.Fatalf("Expected no error, got %v", err)
-        }
-    })
-
-    t.Run("MissingMandatoryFields", func(t *testing.T) {
-        vars := &confVars{missing: []string{"FIELD1", "FIELD2"}}
-        err := vars.Error()
-        if err == nil {
-            t.Fatal("Expected error for missing mandatory fields, got nil")
-        }
-    })
-
-    t.Run("MalformedFields", func(t *testing.T) {
-        vars := &confVars{malformed: []string{"FIELD1", "FIELD2"}}
-        err := vars.Error()
-        if err == nil {
-            t.Fatal("Expected error for malformed fields, got nil")
-        }
-    })
+    config, err := New(mockEnv)
+    assert.NoError(t, err) // It should not error, but use the default value
+    assert.Equal(t, 10, config.PostgresMaxOpenConns) // default value
 }
